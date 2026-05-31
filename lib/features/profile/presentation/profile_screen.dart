@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class InfoScreen extends StatelessWidget {
-  const InfoScreen({super.key});
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Info'),
+        title: const Text('Profil'),
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
@@ -17,7 +17,7 @@ class InfoScreen extends StatelessWidget {
         padding: EdgeInsets.all(24),
         child: Center(
           child: Text(
-            'Der Lernzeit Tracker hilft dir, deine Lernzeiten übersichtlich zu erfassen und deine Lernsessions besser im Blick zu behalten.',
+            'Profilbereich\n\nHier können später persönliche Lernziele, Name oder Statistiken angezeigt werden.',
             textAlign: TextAlign.center,
           ),
         ),
