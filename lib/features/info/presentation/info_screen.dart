@@ -17,7 +17,7 @@ class InfoScreen extends StatelessWidget {
         padding: EdgeInsets.all(24),
         child: Center(
           child: Text(
-            'Der Lernzeit Tracker hilft dir, deine Lernzeiten übersichtlich zu erfassen und deine Lernsessions besser im Blick zu behalten.',
+            'Der Lernzeit Tracker hilft, meine Lernzeiten übersichtlich zu erfassen und meine Lernsessions besser im Blick zu behalten.',
             textAlign: TextAlign.center,
           ),
         ),

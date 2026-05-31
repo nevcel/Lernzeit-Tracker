@@ -17,7 +17,7 @@ class ProfileScreen extends StatelessWidget {
         padding: EdgeInsets.all(24),
         child: Center(
           child: Text(
-            'Profilbereich\n\nHier können später persönliche Lernziele, Name oder Statistiken angezeigt werden.',
+            'Profilbereich\n\nHier kommt später persönliche Lernziele, Name oder Statistiken.',
             textAlign: TextAlign.center,
           ),
         ),
