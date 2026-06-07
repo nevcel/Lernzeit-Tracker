@@ -1,5 +1,6 @@
 import '../domain/lernzeit_session.dart';
 
+// Beispiel-Daten für Lernzeit-Sessions
 final mockLernzeitSessions = const [
   LernzeitSession(
     title: 'Flutter Grundlagen',
@@ -15,7 +16,8 @@ final mockLernzeitSessions = const [
   ),
   LernzeitSession(
     title: 'Projektstruktur planen',
-    description: 'Ordner wie app, features, data, domain und presentation sauber aufbauen.',
+    description:
+        'Ordner wie app, features, data, domain und presentation sauber aufbauen.',
     durationMinutes: 60,
     subject: 'Flutter Projekt',
   ),
