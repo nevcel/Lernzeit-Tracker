@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
 
 import '../data/lernzeit_mock_data.dart';
+import '../domain/lernzeit_session.dart';
+import 'lernzeit_add_screen.dart';
 import 'lernzeit_detail_screen.dart';
 
-// Übersichtsseite für alle Lernzeit-Sessions.
-// Diese Klasse zeigt die vorhandenen Lernsessions als Liste an.
-class LernzeitListScreen extends StatelessWidget {
+class LernzeitListScreen extends StatefulWidget {
   const LernzeitListScreen({super.key});
+
+  @override
+  State<LernzeitListScreen> createState() => _LernzeitListScreenState();
+}
+
+class _LernzeitListScreenState extends State<LernzeitListScreen> {
+  // Veränderbare Liste der Lernzeit-Einträge
+  late List<LernzeitSession> sessions;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Startdaten aus den Mockup-Daten übernehmen
+    sessions = List.from(mockLernzeitSessions);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Obere App-Leiste mit dem Titel der App
       appBar: AppBar(
         title: const Text('Lernzeit Tracker'),
         centerTitle: true,
@@ -20,27 +35,24 @@ class LernzeitListScreen extends StatelessWidget {
         elevation: 4,
       ),
 
-      // Erstellt eine scrollbare Liste aus den vorhandenen Lernzeit-Daten
+      // Anzeige aller gespeicherten Lernzeiten
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: mockLernzeitSessions.length,
+        itemCount: sessions.length,
         itemBuilder: (context, index) {
-          // Holt die aktuelle Lernsession aus der Liste
-          final session = mockLernzeitSessions[index];
+          final session = sessions[index];
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
-
-            // Einzelner Listeneintrag für eine Lernsession
             child: ListTile(
               leading: const Icon(Icons.timer),
               title: Text(session.title),
               subtitle: Text(
-                '${session.subject} · ${session.durationMinutes} Minuten',
+                '${session.subject} · ${session.formattedDuration}'
               ),
               trailing: const Icon(Icons.chevron_right),
 
-              // Öffnet die Detailseite der ausgewählten Lernsession
+              // Öffnet die Detailansicht des ausgewählten Eintrags
               onTap: () {
                 Navigator.push(
                   context,
@@ -53,6 +65,22 @@ class LernzeitListScreen extends StatelessWidget {
             ),
           );
         },
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final newSession = await Navigator.push<LernzeitSession>(
+            context,
+            MaterialPageRoute(builder: (context) => const LernzeitAddScreen()),
+          );
+
+          if (newSession != null) {
+            setState(() {
+              sessions.add(newSession);
+            });
+          }
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

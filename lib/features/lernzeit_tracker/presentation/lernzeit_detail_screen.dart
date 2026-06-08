@@ -55,7 +55,7 @@ class LernzeitDetailScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.timer),
                     const SizedBox(width: 8),
-                    Text('Dauer: ${session.durationMinutes} Minuten'),
+                    Text('Dauer: ${session.formattedDuration}'),
                   ],
                 ),
                 const SizedBox(height: 24),
