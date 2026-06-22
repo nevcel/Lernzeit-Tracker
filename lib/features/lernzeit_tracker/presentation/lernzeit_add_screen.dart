@@ -12,6 +12,8 @@ class LernzeitAddScreen extends StatefulWidget {
 }
 
 class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
+  final formKey = GlobalKey<FormState>();
+  
   final titleController = TextEditingController();
   final subjectController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -54,30 +56,30 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
   }
 
   // Erstellt eine neue Lernsession und gibt sie an die Liste zurück
- void saveSession() {
-  final title = titleController.text.trim();
-  final subject = subjectController.text.trim();
-  final description = descriptionController.text.trim();
+  void saveSession() {
+    final title = titleController.text.trim();
+    final subject = subjectController.text.trim();
+    final description = descriptionController.text.trim();
 
-  // Prüft, ob alle Pflichtfelder ausgefüllt sind
-  if (title.isEmpty || subject.isEmpty || description.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Bitte Titel, Fach und Beschreibung ausfüllen.'),
-      ),
+    // Prüft, ob alle Pflichtfelder ausgefüllt sind
+    if (title.isEmpty || subject.isEmpty || description.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bitte Titel, Fach und Beschreibung ausfüllen.'),
+        ),
+      );
+      return;
+    }
+
+    final newSession = LernzeitSession(
+      title: title,
+      subject: subject,
+      description: description,
+      durationSeconds: elapsedSeconds,
     );
-    return;
+
+    Navigator.pop(context, newSession);
   }
-
-  final newSession = LernzeitSession(
-    title: title,
-    subject: subject,
-    description: description,
-    durationSeconds: elapsedSeconds,
-  );
-
-  Navigator.pop(context, newSession);
-}
 
   @override
   void dispose() {
@@ -104,84 +106,92 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     );
   }
 
-Widget buildTimerView() {
-  return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(
-          Icons.timer,
-          size: 200,
-          color: Colors.deepPurple,
-        ),
-        const SizedBox(height: 32),
-        Text(
-          formattedTime,
-          style: const TextStyle(
-            fontSize: 70,
-            fontWeight: FontWeight.bold,
+  Widget buildTimerView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.timer, size: 200, color: Colors.deepPurple),
+          const SizedBox(height: 32),
+          Text(
+            formattedTime,
+            style: const TextStyle(fontSize: 70, fontWeight: FontWeight.bold),
           ),
-        ),
-        const SizedBox(height: 60),
-        ElevatedButton.icon(
-          onPressed: stopTimer,
-          icon: const Icon(Icons.stop),
-          label: const Text('Stopp'),
-        ),
-      ],
-    ),
-  );
-}
+          const SizedBox(height: 60),
+          ElevatedButton.icon(
+            onPressed: stopTimer,
+            icon: const Icon(Icons.stop),
+            label: const Text('Stopp'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget buildFormView() {
-    return ListView(
-      children: [
-        Text(
-          'Gemessene Lernzeit: $formattedTime',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+    return Form(
+      key: formKey,
+      child: ListView(
+        children: [
+          Text(
+            'Gemessene Lernzeit: $formattedTime',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        // Titel der Lernsession
-        TextField(
-          controller: titleController,
-          decoration: const InputDecoration(
-            labelText: 'Titel',
-            border: OutlineInputBorder(),
+          TextFormField(
+            controller: titleController,
+            decoration: const InputDecoration(
+              labelText: 'Titel',
+              border: OutlineInputBorder(),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Bitte Titel eingeben';
+              }
+              return null;
+            },
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-        // Fach oder Thema der Lernsession
-        TextField(
-          controller: subjectController,
-          decoration: const InputDecoration(
-            labelText: 'Fach',
-            border: OutlineInputBorder(),
+          TextFormField(
+            controller: subjectController,
+            decoration: const InputDecoration(
+              labelText: 'Fach',
+              border: OutlineInputBorder(),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Bitte Fach eingeben';
+              }
+              return null;
+            },
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-        // Kurze Beschreibung der Lernsession
-        TextField(
-          controller: descriptionController,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: 'Beschreibung',
-            border: OutlineInputBorder(),
+          TextFormField(
+            controller: descriptionController,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              labelText: 'Beschreibung',
+              border: OutlineInputBorder(),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Bitte Beschreibung eingeben';
+              }
+              return null;
+            },
           ),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        ElevatedButton.icon(
-          onPressed: saveSession,
-          icon: const Icon(Icons.save),
-          label: const Text('Speichern'),
-        ),
-      ],
+          ElevatedButton.icon(
+            onPressed: saveSession,
+            icon: const Icon(Icons.save),
+            label: const Text('Speichern'),
+          ),
+        ],
+      ),
     );
   }
 }

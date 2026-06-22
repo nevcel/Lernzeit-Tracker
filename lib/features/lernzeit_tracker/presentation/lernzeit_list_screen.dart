@@ -48,19 +48,33 @@ class _LernzeitListScreenState extends State<LernzeitListScreen> {
               leading: const Icon(Icons.timer),
               title: Text(session.title),
               subtitle: Text(
-                '${session.subject} · ${session.formattedDuration}'
+                '${session.subject} · ${session.formattedDuration}',
               ),
               trailing: const Icon(Icons.chevron_right),
 
               // Öffnet die Detailansicht des ausgewählten Eintrags
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
                         LernzeitDetailScreen(session: session),
                   ),
                 );
+
+                // Aktualisiert den Eintrag nach dem Bearbeiten
+                if (result is LernzeitSession) {
+                  setState(() {
+                    sessions[index] = result;
+                  });
+                }
+
+                // Entfernt den Eintrag nach dem Löschen
+                if (result == 'delete') {
+                  setState(() {
+                    sessions.removeAt(index);
+                  });
+                }
               },
             ),
           );
