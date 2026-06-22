@@ -6,10 +6,7 @@ import 'lernzeit_edit_screen.dart';
 class LernzeitDetailScreen extends StatelessWidget {
   final LernzeitSession session;
 
-  const LernzeitDetailScreen({
-    super.key,
-    required this.session,
-  });
+  const LernzeitDetailScreen({super.key, required this.session});
 
   Future<void> openEditScreen(BuildContext context) async {
     final updatedSession = await Navigator.push<LernzeitSession>(
@@ -31,9 +28,7 @@ class LernzeitDetailScreen extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: const Text('Eintrag löschen'),
-          content: const Text(
-            'Möchtest du diese Lernzeit wirklich löschen?',
-          ),
+          content: const Text('Möchtest du diese Lernzeit wirklich löschen?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -108,6 +103,10 @@ class LernzeitDetailScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                        ),
                         onPressed: () {
                           openEditScreen(context);
                         },
@@ -118,6 +117,10 @@ class LernzeitDetailScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
                         onPressed: () {
                           confirmDelete(context);
                         },
