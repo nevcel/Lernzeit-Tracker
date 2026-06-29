@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "559500818795",
+    "project_id": "hf-mobile-lernzeit-tracker-v2",
+    "storage_bucket": "hf-mobile-lernzeit-tracker-v2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559500818795:android:cc92b403e9ffa49f2e742e",
+        "android_client_info": {
+          "package_name": "com.example.lernzeit_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEUoaIm4sgXGQZKX0wCpBTxI-sQlFz10I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
