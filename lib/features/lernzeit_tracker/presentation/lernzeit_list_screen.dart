@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 class LernzeitListScreen extends StatelessWidget {
   const LernzeitListScreen({super.key});
 
+  // Name der Firestore-Collection
   static const String collectionName = 'lernzeit_tracker_collection';
 
+  // Sekunden werden in ein lesbares Zeitformat umgewandelt
   String formatDuration(int durationSeconds) {
     final hours = durationSeconds ~/ 3600;
     final minutes = (durationSeconds % 3600) ~/ 60;
@@ -24,21 +26,26 @@ class LernzeitListScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         elevation: 4,
       ),
+
+      // Firestore-Daten werden einmalig geladen
       body: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
         future: FirebaseFirestore.instance.collection(collectionName).get(),
         builder: (context, snapshot) {
+          // Anzeige während dem Laden
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
+          // Fehleranzeige, falls Firestore nicht geladen werden kann
           if (snapshot.hasError) {
             return Center(
               child: Text('Fehler beim Laden: ${snapshot.error}'),
             );
           }
 
+          // Anzeige, wenn keine Dokumente vorhanden sind
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
               child: Text('Keine Einträge gefunden.'),
