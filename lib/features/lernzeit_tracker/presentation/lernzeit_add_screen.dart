@@ -1,8 +1,7 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-import '../domain/lernzeit_session.dart';
 
 class LernzeitAddScreen extends StatefulWidget {
   const LernzeitAddScreen({super.key});
@@ -12,8 +11,10 @@ class LernzeitAddScreen extends StatefulWidget {
 }
 
 class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
+  static const String collectionName = 'lernzeit_tracker_collection';
+
   final formKey = GlobalKey<FormState>();
-  
+
   final titleController = TextEditingController();
   final subjectController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -21,6 +22,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
   Timer? timer;
   int elapsedSeconds = 0;
   bool isStopped = false;
+  bool isSaving = false;
 
   @override
   void initState() {
@@ -28,7 +30,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     startTimer();
   }
 
-  // Startet die Zeitmessung für die Lernsession
+  // Startet den Timer für die Lernzeit
   void startTimer() {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
@@ -37,7 +39,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     });
   }
 
-  // Stoppt die Zeitmessung und zeigt danach das Formular an
+  // Stoppt den Timer und zeigt das Formular an
   void stopTimer() {
     timer?.cancel();
 
@@ -46,7 +48,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     });
   }
 
-  // Formatiert Sekunden als hh:mm:ss
+  // Sekunden werden für die Anzeige formatiert
   String get formattedTime {
     final hours = elapsedSeconds ~/ 3600;
     final minutes = (elapsedSeconds % 3600) ~/ 60;
@@ -55,30 +57,26 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     return '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} h';
   }
 
-  // Erstellt eine neue Lernsession und gibt sie an die Liste zurück
-  void saveSession() {
-    final title = titleController.text.trim();
-    final subject = subjectController.text.trim();
-    final description = descriptionController.text.trim();
-
-    // Prüft, ob alle Pflichtfelder ausgefüllt sind
-    if (title.isEmpty || subject.isEmpty || description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Bitte Titel, Fach und Beschreibung ausfüllen.'),
-        ),
-      );
+  Future<void> saveSession() async {
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
-    final newSession = LernzeitSession(
-      title: title,
-      subject: subject,
-      description: description,
-      durationSeconds: elapsedSeconds,
-    );
+    setState(() {
+      isSaving = true;
+    });
 
-    Navigator.pop(context, newSession);
+    // Neue Lernzeit wird in Firestore gespeichert
+    await FirebaseFirestore.instance.collection(collectionName).add({
+      'title': titleController.text.trim(),
+      'subject': subjectController.text.trim(),
+      'description': descriptionController.text.trim(),
+      'durationSeconds': elapsedSeconds,
+    });
+
+    if (mounted) {
+      Navigator.pop(context, true);
+    }
   }
 
   @override
@@ -98,6 +96,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
+        elevation: 4,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -111,13 +110,20 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.timer, size: 200, color: Colors.deepPurple),
+          const Icon(
+            Icons.timer,
+            size: 120,
+            color: Colors.deepPurple,
+          ),
           const SizedBox(height: 32),
           Text(
             formattedTime,
-            style: const TextStyle(fontSize: 70, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 56,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: 40),
           ElevatedButton.icon(
             onPressed: stopTimer,
             icon: const Icon(Icons.stop),
@@ -135,10 +141,15 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
         children: [
           Text(
             'Gemessene Lernzeit: $formattedTime',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+
           const SizedBox(height: 24),
 
+          // Titel der Lernsession
           TextFormField(
             controller: titleController,
             decoration: const InputDecoration(
@@ -152,8 +163,10 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
               return null;
             },
           ),
+
           const SizedBox(height: 16),
 
+          // Fach oder Thema der Lernsession
           TextFormField(
             controller: subjectController,
             decoration: const InputDecoration(
@@ -167,8 +180,10 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
               return null;
             },
           ),
+
           const SizedBox(height: 16),
 
+          // Beschreibung zur Lernsession
           TextFormField(
             controller: descriptionController,
             maxLines: 3,
@@ -183,12 +198,17 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
               return null;
             },
           ),
+
           const SizedBox(height: 24),
 
           ElevatedButton.icon(
-            onPressed: saveSession,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: isSaving ? null : saveSession,
             icon: const Icon(Icons.save),
-            label: const Text('Speichern'),
+            label: Text(isSaving ? 'Speichern...' : 'Speichern'),
           ),
         ],
       ),

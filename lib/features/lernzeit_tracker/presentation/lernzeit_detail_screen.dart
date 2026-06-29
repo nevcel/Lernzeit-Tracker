@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/lernzeit_session.dart';
@@ -6,21 +7,26 @@ import 'lernzeit_edit_screen.dart';
 class LernzeitDetailScreen extends StatelessWidget {
   final LernzeitSession session;
 
-  const LernzeitDetailScreen({super.key, required this.session});
+  const LernzeitDetailScreen({
+    super.key,
+    required this.session,
+  });
 
-  Future<void> openEditScreen(BuildContext context) async {
-    final updatedSession = await Navigator.push<LernzeitSession>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LernzeitEditScreen(session: session),
-      ),
-    );
+  static const String collectionName = 'lernzeit_tracker_collection';
 
-    // Bearbeiteten Eintrag an die Listenansicht zurückgeben
-    if (updatedSession != null && context.mounted) {
-      Navigator.pop(context, updatedSession);
-    }
+Future<void> openEditScreen(BuildContext context) async {
+  final wasSaved = await Navigator.push<bool>(
+    context,
+    MaterialPageRoute(
+      builder: (context) => LernzeitEditScreen(session: session),
+    ),
+  );
+
+  // Nach dem Speichern zurück zur Liste, damit sie neu geladen wird
+  if (wasSaved == true && context.mounted) {
+    Navigator.pop(context);
   }
+}
 
   Future<void> confirmDelete(BuildContext context) async {
     final shouldDelete = await showDialog<bool>(
@@ -28,7 +34,9 @@ class LernzeitDetailScreen extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: const Text('Eintrag löschen'),
-          content: const Text('Möchtest du diese Lernzeit wirklich löschen?'),
+          content: const Text(
+            'Möchtest du diese Lernzeit wirklich löschen?',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -47,9 +55,29 @@ class LernzeitDetailScreen extends StatelessWidget {
       },
     );
 
-    // Löschbefehl an die Listenansicht zurückgeben
-    if (shouldDelete == true && context.mounted) {
-      Navigator.pop(context, 'delete');
+    if (shouldDelete == true) {
+      await deleteSession(context);
+    }
+  }
+
+  Future<void> deleteSession(BuildContext context) async {
+    // Ohne Dokument-ID kann kein Firestore-Eintrag gelöscht werden
+    if (session.id.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Eintrag konnte nicht gelöscht werden.'),
+        ),
+      );
+      return;
+    }
+
+    await FirebaseFirestore.instance
+        .collection(collectionName)
+        .doc(session.id)
+        .delete();
+
+    if (context.mounted) {
+      Navigator.pop(context);
     }
   }
 
@@ -98,7 +126,7 @@ class LernzeitDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
 
-                // Aktionen für den aktuellen Eintrag
+                // Aktionen für den ausgewählten Eintrag
                 Row(
                   children: [
                     Expanded(

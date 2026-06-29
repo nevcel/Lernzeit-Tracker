@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/lernzeit_session.dart';
@@ -15,6 +16,8 @@ class LernzeitEditScreen extends StatefulWidget {
 }
 
 class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
+  static const String collectionName = 'lernzeit_tracker_collection';
+
   final formKey = GlobalKey<FormState>();
 
   final titleController = TextEditingController();
@@ -25,32 +28,44 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
   void initState() {
     super.initState();
 
-    // Bestehende Werte in die Eingabefelder übernehmen
+    // Bestehende Werte werden im Formular angezeigt
     titleController.text = widget.session.title;
     subjectController.text = widget.session.subject;
     descriptionController.text = widget.session.description;
   }
 
-  void saveChanges() {
-    // Eingaben prüfen, bevor gespeichert wird
+  Future<void> saveChanges() async {
     if (!formKey.currentState!.validate()) {
       return;
     }
 
-    final updatedSession = LernzeitSession(
-      title: titleController.text.trim(),
-      subject: subjectController.text.trim(),
-      description: descriptionController.text.trim(),
-      durationSeconds: widget.session.durationSeconds,
-    );
+    // Ohne Dokument-ID kann Firestore den Eintrag nicht aktualisieren
+    if (widget.session.id.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Eintrag konnte nicht bearbeitet werden.'),
+        ),
+      );
+      return;
+    }
 
-    // Bearbeiteten Eintrag an die Detailseite zurückgeben
-    Navigator.pop(context, updatedSession);
+    await FirebaseFirestore.instance
+        .collection(collectionName)
+        .doc(widget.session.id)
+        .update({
+      'title': titleController.text.trim(),
+      'subject': subjectController.text.trim(),
+      'description': descriptionController.text.trim(),
+      'durationSeconds': widget.session.durationSeconds,
+    });
+
+    if (mounted) {
+      Navigator.pop(context, true);
+    }
   }
 
   @override
   void dispose() {
-    // Controller freigeben
     titleController.dispose();
     subjectController.dispose();
     descriptionController.dispose();
@@ -65,6 +80,7 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
+        elevation: 4,
       ),
       body: Form(
         key: formKey,
@@ -134,6 +150,10 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
             const SizedBox(height: 24),
 
             ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+              ),
               onPressed: saveChanges,
               icon: const Icon(Icons.save),
               label: const Text('Änderungen speichern'),
