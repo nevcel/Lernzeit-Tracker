@@ -1,37 +1,39 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../features/lernzeit_tracker/presentation/auth_screen.dart';
 import 'navigation_screen.dart';
 
-// Hauptklasse der App
 class App extends StatelessWidget {
   const App({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Titel der App
       title: 'Lernzeit Tracker',
-
-      // Entfernt das Debug-Banner oben rechts
       debugShowCheckedModeBanner: false,
+      home: StreamBuilder<User?>(
+        // Prüft laufend, ob ein Benutzer eingeloggt ist
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // Während Firebase den Login-Status prüft
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
 
-      // Zentrales Design der App
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          // Eingeloggt: App anzeigen
+          if (snapshot.hasData) {
+            return const NavigationScreen();
+          }
 
-        // Design-Einstellungen für alle AppBars
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.white,
-          centerTitle: true,
-          elevation: 4,
-        ),
-
-        useMaterial3: true,
+          // Nicht eingeloggt: Login anzeigen
+          return const AuthScreen();
+        },
       ),
-
-      // Startbildschirm der App
-      home: const NavigationScreen(),
     );
   }
 }

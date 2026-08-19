@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Profilseite der App.
 // Diese Klasse zeigt den Profilbereich an, der später erweitert werden kann.
@@ -18,13 +19,32 @@ class ProfileScreen extends StatelessWidget {
       ),
 
       // Inhalt des Profilbereichs
-      body: const Padding(
-        padding: EdgeInsets.all(24),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
         child: Center(
-          child: Text(
-            // Platzhaltertext für zukünftige Profilinformationen
-            'Profilbereich\n\nHier kommt später persönliche Lernziele, Name oder Statistiken.',
-            textAlign: TextAlign.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Profilbereich\n\nHier kommt später persönliche Lernziele, Name oder Statistiken.',
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              // Benutzer abmelden
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+              ),
+            ],
           ),
         ),
       ),
