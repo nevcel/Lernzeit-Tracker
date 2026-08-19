@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import '../data/lernzeit_firestore.dart';
 
 class LernzeitAddScreen extends StatefulWidget {
   const LernzeitAddScreen({super.key});
@@ -11,8 +12,6 @@ class LernzeitAddScreen extends StatefulWidget {
 }
 
 class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
-  static const String collectionName = 'lernzeit_tracker_collection';
-
   final formKey = GlobalKey<FormState>();
 
   final titleController = TextEditingController();
@@ -30,7 +29,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     startTimer();
   }
 
-  // Startet den Timer für die Lernzeit
+  // Timer für die aktuelle Lernsession
   void startTimer() {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
@@ -39,7 +38,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     });
   }
 
-  // Stoppt den Timer und zeigt das Formular an
+  // Timer stoppen und Formular anzeigen
   void stopTimer() {
     timer?.cancel();
 
@@ -48,7 +47,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     });
   }
 
-  // Sekunden werden für die Anzeige formatiert
+  // Anzeige der gemessenen Lernzeit
   String get formattedTime {
     final hours = elapsedSeconds ~/ 3600;
     final minutes = (elapsedSeconds % 3600) ~/ 60;
@@ -66,8 +65,8 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
       isSaving = true;
     });
 
-    // Neue Lernzeit wird in Firestore gespeichert
-    await FirebaseFirestore.instance.collection(collectionName).add({
+    // Neue Lernzeit im Benutzerbereich speichern
+    await lernzeitenCollection().add({
       'title': titleController.text.trim(),
       'subject': subjectController.text.trim(),
       'description': descriptionController.text.trim(),

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../data/lernzeit_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/lernzeit_session.dart';
@@ -13,8 +14,6 @@ class LernzeitListScreen extends StatefulWidget {
 }
 
 class _LernzeitListScreenState extends State<LernzeitListScreen> {
-  // Firestore-Collection für die Lernzeiten
-  static const String collectionName = 'lernzeit_tracker_collection';
 
   // Firestore-Abfrage für die Liste
   late Future<QuerySnapshot<Map<String, dynamic>>> sessionsFuture;
@@ -26,10 +25,10 @@ class _LernzeitListScreenState extends State<LernzeitListScreen> {
   }
 
   // Lernzeiten aus Firestore laden
-  void loadSessions() {
-    sessionsFuture =
-        FirebaseFirestore.instance.collection(collectionName).get();
-  }
+ void loadSessions() {
+  // Lernzeiten des aktuellen Benutzers laden
+  sessionsFuture = lernzeitenCollection().get();
+}
 
   // Liste nach Änderungen neu laden
   void refreshSessions() {

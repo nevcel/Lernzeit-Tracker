@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../data/lernzeit_firestore.dart';
 import '../domain/lernzeit_session.dart';
 
 class LernzeitEditScreen extends StatefulWidget {
@@ -16,19 +16,19 @@ class LernzeitEditScreen extends StatefulWidget {
 }
 
 class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
-  static const String collectionName = 'lernzeit_tracker_collection';
-
   final formKey = GlobalKey<FormState>();
 
   final titleController = TextEditingController();
   final subjectController = TextEditingController();
   final descriptionController = TextEditingController();
 
+  bool isSaving = false;
+
   @override
   void initState() {
     super.initState();
 
-    // Bestehende Werte werden im Formular angezeigt
+    // Bestehende Werte werden in die Felder übernommen
     titleController.text = widget.session.title;
     subjectController.text = widget.session.subject;
     descriptionController.text = widget.session.description;
@@ -39,7 +39,6 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
       return;
     }
 
-    // Ohne Dokument-ID kann Firestore den Eintrag nicht aktualisieren
     if (widget.session.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -49,10 +48,12 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection(collectionName)
-        .doc(widget.session.id)
-        .update({
+    setState(() {
+      isSaving = true;
+    });
+
+    // Bestehende Lernzeit im Benutzerbereich aktualisieren
+    await lernzeitenCollection().doc(widget.session.id).update({
       'title': titleController.text.trim(),
       'subject': subjectController.text.trim(),
       'description': descriptionController.text.trim(),
@@ -131,7 +132,7 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
 
             const SizedBox(height: 16),
 
-            // Beschreibung der Lernsession
+            // Beschreibung zur Lernsession
             TextFormField(
               controller: descriptionController,
               maxLines: 3,
@@ -154,9 +155,11 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
               ),
-              onPressed: saveChanges,
+              onPressed: isSaving ? null : saveChanges,
               icon: const Icon(Icons.save),
-              label: const Text('Änderungen speichern'),
+              label: Text(
+                isSaving ? 'Speichern...' : 'Änderungen speichern',
+              ),
             ),
           ],
         ),

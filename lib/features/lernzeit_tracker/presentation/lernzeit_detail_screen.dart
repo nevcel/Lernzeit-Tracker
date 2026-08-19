@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../data/lernzeit_firestore.dart';
 import '../domain/lernzeit_session.dart';
 import 'lernzeit_edit_screen.dart';
 
@@ -12,21 +12,19 @@ class LernzeitDetailScreen extends StatelessWidget {
     required this.session,
   });
 
-  static const String collectionName = 'lernzeit_tracker_collection';
+  Future<void> openEditScreen(BuildContext context) async {
+    final wasSaved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LernzeitEditScreen(session: session),
+      ),
+    );
 
-Future<void> openEditScreen(BuildContext context) async {
-  final wasSaved = await Navigator.push<bool>(
-    context,
-    MaterialPageRoute(
-      builder: (context) => LernzeitEditScreen(session: session),
-    ),
-  );
-
-  // Nach dem Speichern zurück zur Liste, damit sie neu geladen wird
-  if (wasSaved == true && context.mounted) {
-    Navigator.pop(context);
+    // Nach dem Bearbeiten zurück zur Liste
+    if (wasSaved == true && context.mounted) {
+      Navigator.pop(context);
+    }
   }
-}
 
   Future<void> confirmDelete(BuildContext context) async {
     final shouldDelete = await showDialog<bool>(
@@ -61,7 +59,6 @@ Future<void> openEditScreen(BuildContext context) async {
   }
 
   Future<void> deleteSession(BuildContext context) async {
-    // Ohne Dokument-ID kann kein Firestore-Eintrag gelöscht werden
     if (session.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -71,10 +68,8 @@ Future<void> openEditScreen(BuildContext context) async {
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection(collectionName)
-        .doc(session.id)
-        .delete();
+    // Lernzeit im Benutzerbereich löschen
+    await lernzeitenCollection().doc(session.id).delete();
 
     if (context.mounted) {
       Navigator.pop(context);
@@ -103,7 +98,9 @@ Future<void> openEditScreen(BuildContext context) async {
                   session.title,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
+
                 const SizedBox(height: 16),
+
                 Row(
                   children: [
                     const Icon(Icons.school),
@@ -111,7 +108,9 @@ Future<void> openEditScreen(BuildContext context) async {
                     Text('Fach: ${session.subject}'),
                   ],
                 ),
+
                 const SizedBox(height: 12),
+
                 Row(
                   children: [
                     const Icon(Icons.timer),
@@ -119,11 +118,14 @@ Future<void> openEditScreen(BuildContext context) async {
                     Text('Dauer: ${session.formattedDuration}'),
                   ],
                 ),
+
                 const SizedBox(height: 24),
+
                 Text(
                   session.description,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
+
                 const SizedBox(height: 32),
 
                 // Aktionen für den ausgewählten Eintrag
@@ -142,7 +144,9 @@ Future<void> openEditScreen(BuildContext context) async {
                         label: const Text('Bearbeiten'),
                       ),
                     ),
+
                     const SizedBox(width: 12),
+
                     Expanded(
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
