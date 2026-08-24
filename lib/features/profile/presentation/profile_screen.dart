@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Profilseite der App.
-// Diese Klasse zeigt den Profilbereich an, der später erweitert werden kann.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -26,7 +25,7 @@ class ProfileScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Profilbereich\n\nHier kommt später persönliche Lernziele, Name oder Statistiken.',
+                'Weitere Profilfunktionen folgen.',
                 textAlign: TextAlign.center,
               ),
 

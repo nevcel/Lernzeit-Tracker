@@ -17,9 +17,8 @@ Der **Lernzeit Tracker** ist eine mit Flutter entwickelte App zur Erfassung und 
 
 Die App verwendet **Firebase Authentication** für die Benutzeranmeldung und **Cloud Firestore** für die dauerhafte Speicherung der Lernzeiteinträge.
 
-Die Daten werden dem jeweils angemeldeten Benutzer zugeordnet. In Firestore werden die Lernzeiteinträge mit den benötigten Informationen wie Titel, Beschreibung und weiteren Angaben zur Lernzeit gespeichert.
+Die Daten werden dem jeweils angemeldeten Benutzer zugeordnet. In Firestore werden die Lernzeiteinträge mit den benötigten Informationen wie Titel, Beschreibung und weiteren Angaben zur Lernzeit gespeichert. Jeder Benutzer sieht nur seine eigenen Lernzeiteinträge.
 
-Dadurch besitzt jeder Benutzer seinen eigenen persönlichen Datenbereich.
 
 ## Datenverwaltung
 
@@ -33,7 +32,7 @@ Neue Lernzeiteinträge werden direkt in Firestore gespeichert. Bereits vorhanden
 
 Die ursprüngliche Version der App basierte auf einer grundlegenden Navigation sowie einer Listen- und Detailansicht mit Mockup-Daten.
 
-Diese Grundlage wurde zu einer datenbankgestützten Anwendung weiterentwickelt. Die bisherigen Beispieldaten wurden durch dauerhaft gespeicherte Firestore-Daten ersetzt.
+Die erste Version arbeitete mit Mock-Daten. In der aktuellen Version werden die Lernzeiten in Firestore gespeichert. Zusätzlich wurden Login, benutzerbezogene Daten, CRUD-Funktionen und Validierungen umgesetzt.
 
 Zusätzlich wurden Firebase Authentication, benutzerbezogene Datenspeicherung, vollständige CRUD-Funktionen, Eingabevalidierung sowie Lade-, Leer- und Fehlerzustände integriert.
 
@@ -46,9 +45,7 @@ Zusätzlich wurden Firebase Authentication, benutzerbezogene Datenspeicherung, v
 
 ## Ausblick
 
-Als nächste Erweiterung bietet sich eine **Statistik- und Auswertungsfunktion** an. Die bereits gespeicherten Lernzeiten könnten beispielsweise nach Tagen, Wochen oder Monaten ausgewertet werden.
-
-Zusätzlich könnten persönliche Lernziele definiert und deren Fortschritt dargestellt werden. Dadurch würde die App neben der Erfassung von Lernzeiten auch eine langfristige Übersicht über das eigene Lernverhalten ermöglichen.
+Als nächste Erweiterung könnte eine Statistik eingebaut werden. Damit könnten Lernzeiten pro Tag, Woche oder Monat ausgewertet werden. Zusätzlich wären persönliche Lernziele möglich.
 
 
 ## Projektstruktur Übersicht

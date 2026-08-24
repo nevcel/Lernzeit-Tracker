@@ -26,7 +26,6 @@ class _LernzeitListScreenState extends State<LernzeitListScreen> {
 
   // Lernzeiten aus Firestore laden
  void loadSessions() {
-  // Lernzeiten des aktuellen Benutzers laden
   sessionsFuture = lernzeitenCollection().get();
 }
 
