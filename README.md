@@ -1,17 +1,51 @@
-# lernzeit_tracker
+# Lernzeit Tracker
 
-A new Flutter project.
+Der Lernzeit Tracker ist eine Flutter-Anwendung zur strukturierten Erfassung und Verwaltung persönlicher Lernzeiten.
 
-## Getting Started
+Benutzerinnen und Benutzer können eigene Lerneinträge erstellen, anzeigen, bearbeiten und löschen. Die Daten werden dauerhaft und benutzerbezogen in Cloud Firestore gespeichert. Die Anmeldung erfolgt über Firebase Authentication mit E-Mail-Adresse und Passwort.
 
-This project is a starting point for a Flutter application.
+## Funktionen
 
-A few resources to get you started if this is your first Flutter project:
+- Benutzeranmeldung mit E-Mail und Passwort
+- Benutzerabmeldung mit Logout
+- Lernzeiten erstellen
+- Lernzeiten anzeigen
+- Lernzeiten bearbeiten
+- Lernzeiten löschen
+- Benutzerbezogene Datenspeicherung
+- Synchronisation mit Cloud Firestore
+- Eingabevalidierung
+- Lade-, Leer- und Fehlerzustände
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Technologien
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Flutter
+- Dart
+- Firebase Authentication
+- Cloud Firestore
+
+## Projektstruktur
+
+```text
+lib/
+├── main.dart
+├── firebase_options.dart
+│
+├── app/
+│   ├── app.dart
+│   └── navigation_screen.dart
+│
+└── features/
+    ├── auth/
+    │   └── presentation/
+    │
+    ├── tasks/
+    │   ├── data/
+    │   ├── domain/
+    │   └── presentation/
+    │
+    ├── info/
+    │   └── presentation/
+    │
+    └── profile/
+        └── presentation/
