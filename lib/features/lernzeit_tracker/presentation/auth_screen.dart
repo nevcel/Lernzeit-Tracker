@@ -17,72 +17,98 @@ class _AuthScreenState extends State<AuthScreen> {
   bool isLogin = true;
   bool isLoading = false;
 
+  // Verständliche Fehlermeldungen für Firebase Authentication
+  String getAuthErrorMessage(FirebaseAuthException error) {
+    switch (error.code) {
+      case 'invalid-credential':
+        return 'E-Mail-Adresse oder Passwort ist nicht korrekt.';
+
+      case 'user-not-found':
+        return 'Kein Benutzer mit dieser E-Mail-Adresse gefunden.';
+
+      case 'wrong-password':
+        return 'Das Passwort ist nicht korrekt.';
+
+      case 'email-already-in-use':
+        return 'Diese E-Mail-Adresse wird bereits verwendet.';
+
+      case 'weak-password':
+        return 'Das Passwort ist zu schwach.';
+
+      case 'invalid-email':
+        return 'Die E-Mail-Adresse ist ungültig.';
+
+      case 'user-disabled':
+        return 'Dieses Benutzerkonto wurde deaktiviert.';
+
+      case 'too-many-requests':
+        return 'Zu viele Versuche. Bitte versuche es später erneut.';
+
+      case 'network-request-failed':
+        return 'Keine Netzwerkverbindung. Bitte überprüfe deine Internetverbindung.';
+
+      case 'operation-not-allowed':
+        return 'Diese Anmeldemethode ist momentan nicht verfügbar.';
+
+      default:
+        return 'Es ist ein Fehler aufgetreten. Bitte versuche es erneut.';
+    }
+  }
+
   Future<void> submitForm() async {
-  if (!formKey.currentState!.validate()) {
-    return;
-  }
-
-  setState(() {
-    isLoading = true;
-  });
-
-  try {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
-
-    if (isLogin) {
-      // Bestehenden Benutzer anmelden
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } else {
-      // Neuen Benutzer registrieren
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    }
-  } on FirebaseAuthException catch (error) {
-    String message = 'Anmeldung fehlgeschlagen.';
-
-    if (error.code == 'user-not-found') {
-      message = 'Kein Benutzer mit dieser E-Mail gefunden.';
-    } else if (error.code == 'wrong-password') {
-      message = 'Das Passwort ist falsch.';
-    } else if (error.code == 'email-already-in-use') {
-      message = 'Diese E-Mail-Adresse wird bereits verwendet.';
-    } else if (error.code == 'weak-password') {
-      message = 'Das Passwort ist zu schwach.';
-    } else if (error.code == 'invalid-email') {
-      message = 'Die E-Mail-Adresse ist ungültig.';
-    } else if (error.code == 'operation-not-allowed') {
-      message = 'E-Mail/Passwort ist in Firebase nicht aktiviert.';
+    if (!formKey.currentState!.validate()) {
+      return;
     }
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-        ),
-      );
-    }
-  } catch (error) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Fehler: $error'),
-        ),
-      );
-    }
-  } finally {
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final email = emailController.text.trim();
+      final password = passwordController.text.trim();
+
+      if (isLogin) {
+        // Bestehenden Benutzer anmelden
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } else {
+        // Neuen Benutzer registrieren
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      }
+    } on FirebaseAuthException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              getAuthErrorMessage(error),
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Es ist ein unerwarteter Fehler aufgetreten. Bitte versuche es erneut.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
-}
 
   @override
   void dispose() {
@@ -95,7 +121,9 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isLogin ? 'Login' : 'Registrieren'),
+        title: Text(
+          isLogin ? 'Login' : 'Registrieren',
+        ),
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,

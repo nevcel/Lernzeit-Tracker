@@ -25,6 +25,14 @@ flutter_launcher_icons:
   min_sdk_android: 21
   remove_alpha_ios: true
 
+flutter_native_splash:
+  color: "#673AB7"
+  image: assets/images/lernzeit_logo.png
+
+  android_12:
+    color: "#673AB7"
+    image: assets/images/lernzeit_logo.png
+
 environment:
   sdk: ^3.12.0
 
