@@ -53,7 +53,80 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     final minutes = (elapsedSeconds % 3600) ~/ 60;
     final seconds = elapsedSeconds % 60;
 
-    return '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} h';
+    return '$hours:${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')} h';
+  }
+
+  // Motivation abhängig von der Dauer der Lernsession
+  String get successMessage {
+    if (elapsedSeconds < 600) {
+      return 'Kleine Schritte zählen! 🌱';
+    }
+
+    if (elapsedSeconds < 1800) {
+      return 'Gute Session! Weiter so. 💪';
+    }
+
+    if (elapsedSeconds < 3600) {
+      return 'Starke Leistung! 🔥';
+    }
+
+    return 'Wow – richtig starke Lernsession! 🏆';
+  }
+
+  // Erfolgsmeldung nach dem Speichern anzeigen
+  Future<void> showSuccessDialog() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'Lernsession abgeschlossen! 🎉',
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.celebration,
+                size: 64,
+                color: Colors.deepPurple,
+              ),
+
+              const SizedBox(height: 20),
+
+              Text(
+                'Du hast $formattedTime gelernt.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Text(
+                successMessage,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Weiter'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> saveSession() async {
@@ -78,8 +151,15 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
         return;
       }
 
+      // Erfolgsmoment nach erfolgreichem Speichern
+      await showSuccessDialog();
+
+      if (!mounted) {
+        return;
+      }
+
       Navigator.pop(context, true);
-    } catch (e) {
+    } catch (_) {
       if (!mounted) {
         return;
       }
@@ -87,7 +167,8 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Die Lernzeit konnte nicht gespeichert werden. Bitte versuche es erneut.',
+            'Die Lernzeit konnte nicht gespeichert werden. '
+            'Bitte versuche es erneut.',
           ),
         ),
       );
@@ -114,10 +195,6 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Neue Lernzeit'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 4,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -131,11 +208,18 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.timer, size: 120, color: Colors.deepPurple),
+          const Icon(
+            Icons.timer,
+            size: 120,
+            color: Colors.deepPurple,
+          ),
           const SizedBox(height: 32),
           Text(
             formattedTime,
-            style: const TextStyle(fontSize: 56, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 56,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 40),
           ElevatedButton.icon(
@@ -155,17 +239,18 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
         children: [
           Text(
             'Gemessene Lernzeit: $formattedTime',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
 
           const SizedBox(height: 24),
 
-          // Titel der Lernsession
           TextFormField(
             controller: titleController,
             decoration: const InputDecoration(
               labelText: 'Titel',
-              border: OutlineInputBorder(),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -177,12 +262,10 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
 
           const SizedBox(height: 16),
 
-          // Fach oder Thema der Lernsession
           TextFormField(
             controller: subjectController,
             decoration: const InputDecoration(
               labelText: 'Fach',
-              border: OutlineInputBorder(),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -194,13 +277,11 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
 
           const SizedBox(height: 16),
 
-          // Beschreibung zur Lernsession
           TextFormField(
             controller: descriptionController,
             maxLines: 3,
             decoration: const InputDecoration(
               labelText: 'Beschreibung',
-              border: OutlineInputBorder(),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -213,13 +294,11 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
           const SizedBox(height: 24),
 
           ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              foregroundColor: Colors.white,
-            ),
             onPressed: isSaving ? null : saveSession,
             icon: const Icon(Icons.save),
-            label: Text(isSaving ? 'Speichern...' : 'Speichern'),
+            label: Text(
+              isSaving ? 'Speichern...' : 'Speichern',
+            ),
           ),
         ],
       ),
