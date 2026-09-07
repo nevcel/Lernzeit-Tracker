@@ -6,10 +6,7 @@ import '../domain/lernzeit_session.dart';
 class LernzeitEditScreen extends StatefulWidget {
   final LernzeitSession session;
 
-  const LernzeitEditScreen({
-    super.key,
-    required this.session,
-  });
+  const LernzeitEditScreen({super.key, required this.session});
 
   @override
   State<LernzeitEditScreen> createState() => _LernzeitEditScreenState();
@@ -52,16 +49,38 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
       isSaving = true;
     });
 
-    // Bestehende Lernzeit im Benutzerbereich aktualisieren
-    await lernzeitenCollection().doc(widget.session.id).update({
-      'title': titleController.text.trim(),
-      'subject': subjectController.text.trim(),
-      'description': descriptionController.text.trim(),
-      'durationSeconds': widget.session.durationSeconds,
-    });
+    try {
+      // Bestehende Lernzeit im Benutzerbereich aktualisieren
+      await updateLernzeit(
+        id: widget.session.id,
+        title: titleController.text.trim(),
+        subject: subjectController.text.trim(),
+        description: descriptionController.text.trim(),
+        durationSeconds: widget.session.durationSeconds,
+      );
+      if (!mounted) {
+        return;
+      }
 
-    if (mounted) {
       Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Die Lernzeit konnte nicht aktualisiert werden. Bitte versuche es erneut.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSaving = false;
+        });
+      }
     }
   }
 
@@ -90,10 +109,7 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
           children: [
             Text(
               'Gespeicherte Lernzeit: ${widget.session.formattedDuration}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 24),
@@ -157,9 +173,7 @@ class _LernzeitEditScreenState extends State<LernzeitEditScreen> {
               ),
               onPressed: isSaving ? null : saveChanges,
               icon: const Icon(Icons.save),
-              label: Text(
-                isSaving ? 'Speichern...' : 'Änderungen speichern',
-              ),
+              label: Text(isSaving ? 'Speichern...' : 'Änderungen speichern'),
             ),
           ],
         ),

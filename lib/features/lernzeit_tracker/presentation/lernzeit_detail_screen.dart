@@ -7,10 +7,7 @@ import 'lernzeit_edit_screen.dart';
 class LernzeitDetailScreen extends StatelessWidget {
   final LernzeitSession session;
 
-  const LernzeitDetailScreen({
-    super.key,
-    required this.session,
-  });
+  const LernzeitDetailScreen({super.key, required this.session});
 
   Future<void> openEditScreen(BuildContext context) async {
     final wasSaved = await Navigator.push<bool>(
@@ -32,9 +29,7 @@ class LernzeitDetailScreen extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: const Text('Eintrag löschen'),
-          content: const Text(
-            'Möchtest du diese Lernzeit wirklich löschen?',
-          ),
+          content: const Text('Möchtest du diese Lernzeit wirklich löschen?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -53,6 +48,10 @@ class LernzeitDetailScreen extends StatelessWidget {
       },
     );
 
+    if (!context.mounted) {
+      return;
+    }
+
     if (shouldDelete == true) {
       await deleteSession(context);
     }
@@ -61,18 +60,32 @@ class LernzeitDetailScreen extends StatelessWidget {
   Future<void> deleteSession(BuildContext context) async {
     if (session.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Eintrag konnte nicht gelöscht werden.'),
-        ),
+        const SnackBar(content: Text('Eintrag konnte nicht gelöscht werden.')),
       );
       return;
     }
 
-    // Lernzeit im Benutzerbereich löschen
-    await lernzeitenCollection().doc(session.id).delete();
+    try {
+      // Lernzeit im Benutzerbereich löschen
+      await deleteLernzeit(id: session.id);
 
-    if (context.mounted) {
+      if (!context.mounted) {
+        return;
+      }
+
       Navigator.pop(context);
+    } catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Die Lernzeit konnte nicht gelöscht werden. Bitte versuche es erneut.',
+          ),
+        ),
+      );
     }
   }
 

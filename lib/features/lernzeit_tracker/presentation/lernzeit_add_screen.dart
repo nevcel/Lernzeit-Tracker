@@ -65,16 +65,38 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
       isSaving = true;
     });
 
-    // Neue Lernzeit im Benutzerbereich speichern
-    await lernzeitenCollection().add({
-      'title': titleController.text.trim(),
-      'subject': subjectController.text.trim(),
-      'description': descriptionController.text.trim(),
-      'durationSeconds': elapsedSeconds,
-    });
+    try {
+      // Neue Lernzeit im Benutzerbereich speichern
+      await createLernzeit(
+        title: titleController.text.trim(),
+        subject: subjectController.text.trim(),
+        description: descriptionController.text.trim(),
+        durationSeconds: elapsedSeconds,
+      );
 
-    if (mounted) {
+      if (!mounted) {
+        return;
+      }
+
       Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Die Lernzeit konnte nicht gespeichert werden. Bitte versuche es erneut.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSaving = false;
+        });
+      }
     }
   }
 
@@ -109,18 +131,11 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.timer,
-            size: 120,
-            color: Colors.deepPurple,
-          ),
+          const Icon(Icons.timer, size: 120, color: Colors.deepPurple),
           const SizedBox(height: 32),
           Text(
             formattedTime,
-            style: const TextStyle(
-              fontSize: 56,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 56, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 40),
           ElevatedButton.icon(
@@ -140,10 +155,7 @@ class _LernzeitAddScreenState extends State<LernzeitAddScreen> {
         children: [
           Text(
             'Gemessene Lernzeit: $formattedTime',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 24),

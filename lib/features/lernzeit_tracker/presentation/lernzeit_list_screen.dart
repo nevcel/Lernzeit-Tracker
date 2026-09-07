@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../data/lernzeit_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../data/lernzeit_firestore.dart';
 import '../domain/lernzeit_session.dart';
 import 'lernzeit_add_screen.dart';
 import 'lernzeit_detail_screen.dart';
@@ -14,9 +13,8 @@ class LernzeitListScreen extends StatefulWidget {
 }
 
 class _LernzeitListScreenState extends State<LernzeitListScreen> {
-
-  // Firestore-Abfrage für die Liste
-  late Future<QuerySnapshot<Map<String, dynamic>>> sessionsFuture;
+  // Geladene Lernzeiten
+  late Future<List<LernzeitSession>> sessionsFuture;
 
   @override
   void initState() {
@@ -24,31 +22,16 @@ class _LernzeitListScreenState extends State<LernzeitListScreen> {
     loadSessions();
   }
 
-  // Lernzeiten aus Firestore laden
- void loadSessions() {
-  sessionsFuture = lernzeitenCollection().get();
-}
+  // Lernzeiten laden
+  void loadSessions() {
+    sessionsFuture = getLernzeiten();
+  }
 
   // Liste nach Änderungen neu laden
   void refreshSessions() {
     setState(() {
       loadSessions();
     });
-  }
-
-  // Firestore-Dokument in ein LernzeitSession-Objekt umwandeln
-  LernzeitSession sessionFromDocument(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    final data = doc.data();
-
-    return LernzeitSession(
-      id: doc.id,
-      title: data['title'] ?? '',
-      description: data['description'] ?? '',
-      subject: data['subject'] ?? '',
-      durationSeconds: (data['durationSeconds'] as num?)?.toInt() ?? 0,
-    );
   }
 
   @override
@@ -62,35 +45,31 @@ class _LernzeitListScreenState extends State<LernzeitListScreen> {
         elevation: 4,
       ),
 
-      // Lernzeiten werden aus Firestore angezeigt
-      body: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      // Lernzeiten anzeigen
+      body: FutureBuilder<List<LernzeitSession>>(
         future: sessionsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Fehler beim Laden: ${snapshot.error}'),
-            );
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
-              child: Text('Keine Einträge gefunden.'),
+              child: Text('Die Lernzeiten konnten nicht geladen werden.'),
             );
           }
 
-          final docs = snapshot.data!.docs;
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Keine Einträge gefunden.'));
+          }
+
+          final sessions = snapshot.data!;
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: docs.length,
+            itemCount: sessions.length,
             itemBuilder: (context, index) {
-              final session = sessionFromDocument(docs[index]);
+              final session = sessions[index];
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -98,7 +77,8 @@ class _LernzeitListScreenState extends State<LernzeitListScreen> {
                   leading: const Icon(Icons.timer),
                   title: Text(session.title),
                   subtitle: Text(
-                    '${session.subject} · ${session.formattedDuration}\n${session.description}',
+                    '${session.subject} · ${session.formattedDuration}\n'
+                    '${session.description}',
                   ),
                   trailing: const Icon(Icons.chevron_right),
 
@@ -128,9 +108,7 @@ class _LernzeitListScreenState extends State<LernzeitListScreen> {
         onPressed: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const LernzeitAddScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const LernzeitAddScreen()),
           );
 
           refreshSessions();

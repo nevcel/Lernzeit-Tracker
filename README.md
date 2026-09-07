@@ -63,7 +63,7 @@ lib/
     ├── auth/
     │   └── presentation/
     │
-    ├── tasks/
+    ├── lernzeit_tracker/
     │   ├── data/
     │   ├── domain/
     │   └── presentation/
