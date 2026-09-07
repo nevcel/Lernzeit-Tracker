@@ -73,3 +73,88 @@ lib/
     │
     └── profile/
         └── presentation/
+
+```
+
+## Packages und Assets
+
+Für die App wurde das Package `flutter_svg` verwendet.
+
+Das Package wurde ausgewählt, weil es SVG-Dateien direkt in Flutter darstellen kann, gut dokumentiert ist und die benötigten Plattformen unterstützt. Zusätzlich eignet es sich gut für die Einbindung eines eigenen App-Logos.
+
+Installiert wurde das Package mit:
+
+```bash
+flutter pub add flutter_svg
+```
+
+Das eigene SVG-Asset befindet sich unter:
+
+```text
+assets/images/lernzeit_logo.svg
+```
+
+Der Asset-Ordner wurde in der `pubspec.yaml` registriert:
+
+```yaml
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+```
+
+Im Dart-Code wird das Package mit folgendem Import verwendet:
+
+```dart
+import 'package:flutter_svg/flutter_svg.dart';
+```
+
+Das Logo wird im Info-Bereich der App mit `SvgPicture.asset()` eingebunden:
+
+```dart
+SvgPicture.asset(
+  'assets/images/lernzeit_logo.svg',
+  width: 140,
+  height: 140,
+)
+```
+
+### Angepasste Dateien
+
+Für die Umsetzung wurden folgende Dateien angepasst beziehungsweise ergänzt:
+
+```text
+pubspec.yaml
+pubspec.lock
+lib/features/info/presentation/info_screen.dart
+assets/images/lernzeit_logo.svg
+```
+
+### Test
+
+Nach der Installation und Registrierung des Assets wurde ausgeführt:
+
+```bash
+flutter pub get
+```
+
+Anschliessend wurde die App gestartet und geprüft, ob das SVG-Logo im Info-Bereich korrekt angezeigt wird.
+
+Das Package und das Asset funktionieren wie vorgesehen.
+
+### Fehlerbehebung
+
+Falls ein Package nicht gefunden oder ein Asset nicht angezeigt wird, werden die möglichen Fehler schrittweise überprüft:
+
+- Eintrag des Packages in der `pubspec.yaml`
+- korrekte YAML-Einrückung
+- erfolgreiche Installation des Packages
+- korrekter Import im Dart-Code
+- korrekter Asset-Eintrag in der `pubspec.yaml`
+- exakter Asset-Pfad
+- Gross- und Kleinschreibung des Dateinamens
+- Ausführen von `flutter pub get`
+- Neustart der App nach Änderungen
+
+Durch dieses Vorgehen können typische Fehler bei Packages, Imports und Assets systematisch gefunden und behoben werden.
