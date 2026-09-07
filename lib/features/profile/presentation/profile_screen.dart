@@ -1,5 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../../lernzeit_tracker/data/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -9,6 +10,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final AuthService authService = AuthService();
+
   bool isLoggingOut = false;
 
   Future<void> logout() async {
@@ -17,19 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     try {
-      await FirebaseAuth.instance.signOut();
-    } on FirebaseAuthException {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Abmeldung fehlgeschlagen. Bitte versuche es erneut.',
-          ),
-        ),
-      );
+      await authService.signOut();
     } catch (_) {
       if (!mounted) {
         return;
@@ -38,7 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Es ist ein unerwarteter Fehler aufgetreten.',
+            'Abmeldung fehlgeschlagen. Bitte versuche es erneut.',
           ),
         ),
       );
@@ -53,15 +44,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = authService.currentUser;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profil'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 4,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -107,10 +94,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                      ),
                       onPressed: isLoggingOut ? null : logout,
                       icon: const Icon(Icons.logout),
                       label: Text(

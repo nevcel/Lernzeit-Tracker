@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../data/auth_service.dart';
+
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -13,6 +15,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  final AuthService authService = AuthService();
 
   bool isLogin = true;
   bool isLoading = false;
@@ -69,14 +73,14 @@ class _AuthScreenState extends State<AuthScreen> {
       final password = passwordController.text.trim();
 
       if (isLogin) {
-        // Bestehenden Benutzer anmelden
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
+        // Bestehenden Benutzer über den AuthService anmelden
+        await authService.signIn(
           email: email,
           password: password,
         );
       } else {
-        // Neuen Benutzer registrieren
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        // Neuen Benutzer über den AuthService registrieren
+        await authService.register(
           email: email,
           password: password,
         );
@@ -124,10 +128,6 @@ class _AuthScreenState extends State<AuthScreen> {
         title: Text(
           isLogin ? 'Login' : 'Registrieren',
         ),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 4,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -154,7 +154,6 @@ class _AuthScreenState extends State<AuthScreen> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         labelText: 'E-Mail',
-                        border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -177,7 +176,6 @@ class _AuthScreenState extends State<AuthScreen> {
                       obscureText: true,
                       decoration: const InputDecoration(
                         labelText: 'Passwort',
-                        border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -195,10 +193,6 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 24),
 
                     ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                      ),
                       onPressed: isLoading ? null : submitForm,
                       icon: const Icon(Icons.login),
                       label: Text(

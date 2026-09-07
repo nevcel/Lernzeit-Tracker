@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../features/lernzeit_tracker/data/auth_service.dart';
 import '../features/lernzeit_tracker/presentation/auth_screen.dart';
 import '../features/lernzeit_tracker/presentation/welcome_screen.dart';
 import 'navigation_screen.dart';
@@ -14,6 +14,8 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+  final AuthService authService = AuthService();
+
   late Future<bool> onboardingFuture;
 
   @override
@@ -117,9 +119,9 @@ class _AppState extends State<App> {
             );
           }
 
-          // Danach Login-Status prüfen
-          return StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.authStateChanges(),
+          // Danach Login-Status über den AuthService prüfen
+          return StreamBuilder(
+            stream: authService.authStateChanges(),
             builder: (context, authSnapshot) {
               if (authSnapshot.connectionState ==
                   ConnectionState.waiting) {
