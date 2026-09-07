@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../features/lernzeit_tracker/presentation/lernzeit_list_screen.dart';
+
 import '../features/info/presentation/info_screen.dart';
+import '../features/lernzeit_tracker/presentation/lernzeit_list_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 
-// Bildschirm mit der unteren Navigation
+// Bildschirm mit der globalen Hauptnavigation
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
 
@@ -15,31 +16,47 @@ class _NavigationScreenState extends State<NavigationScreen> {
   // Speichert den aktuell ausgewählten Tab
   int currentIndex = 0;
 
-  // Liste der Bildschirme, zwischen denen gewechselt wird
-  final screens = const [LernzeitListScreen(), InfoScreen(), ProfileScreen()];
+  // Hauptbereiche der App
+  final screens = const [
+    LernzeitListScreen(),
+    InfoScreen(),
+    ProfileScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Zeigt den Bildschirm passend zum ausgewählten Tab an
-      body: screens[currentIndex],
+      // IndexedStack erhält den Zustand der einzelnen Tabs
+      body: IndexedStack(
+        index: currentIndex,
+        children: screens,
+      ),
 
-      // Untere Navigationsleiste
+      // Untere Hauptnavigation
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-
-        // Wird ausgeführt, wenn ein Tab angeklickt wird
+        selectedItemColor: Colors.deepPurple,
         onTap: (index) {
           setState(() {
             currentIndex = index;
           });
         },
-
-        // Einzelne Navigationspunkte
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'Lernzeiten'),
-          BottomNavigationBarItem(icon: Icon(Icons.info), label: 'Info'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timer_outlined),
+            activeIcon: Icon(Icons.timer),
+            label: 'Lernzeiten',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.info_outline),
+            activeIcon: Icon(Icons.info),
+            label: 'Info',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profil',
+          ),
         ],
       ),
     );

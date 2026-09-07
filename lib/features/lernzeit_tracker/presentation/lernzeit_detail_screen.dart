@@ -7,18 +7,27 @@ import 'lernzeit_edit_screen.dart';
 class LernzeitDetailScreen extends StatelessWidget {
   final LernzeitSession session;
 
-  const LernzeitDetailScreen({super.key, required this.session});
+  const LernzeitDetailScreen({
+    super.key,
+    required this.session,
+  });
 
   Future<void> openEditScreen(BuildContext context) async {
     final wasSaved = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => LernzeitEditScreen(session: session),
+        builder: (context) => LernzeitEditScreen(
+          session: session,
+        ),
       ),
     );
 
+    if (!context.mounted) {
+      return;
+    }
+
     // Nach dem Bearbeiten zurück zur Liste
-    if (wasSaved == true && context.mounted) {
+    if (wasSaved == true) {
       Navigator.pop(context);
     }
   }
@@ -29,7 +38,9 @@ class LernzeitDetailScreen extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: const Text('Eintrag löschen'),
-          content: const Text('Möchtest du diese Lernzeit wirklich löschen?'),
+          content: const Text(
+            'Möchtest du diese Lernzeit wirklich löschen?',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -60,21 +71,26 @@ class LernzeitDetailScreen extends StatelessWidget {
   Future<void> deleteSession(BuildContext context) async {
     if (session.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Eintrag konnte nicht gelöscht werden.')),
+        const SnackBar(
+          content: Text(
+            'Eintrag konnte nicht gelöscht werden.',
+          ),
+        ),
       );
       return;
     }
 
     try {
-      // Lernzeit im Benutzerbereich löschen
-      await deleteLernzeit(id: session.id);
+      await deleteLernzeit(
+        id: session.id,
+      );
 
       if (!context.mounted) {
         return;
       }
 
       Navigator.pop(context);
-    } catch (e) {
+    } catch (_) {
       if (!context.mounted) {
         return;
       }
@@ -94,18 +110,14 @@ class LernzeitDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(session.title),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 4,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Card(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   session.title,
@@ -118,7 +130,11 @@ class LernzeitDetailScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.school),
                     const SizedBox(width: 8),
-                    Text('Fach: ${session.subject}'),
+                    Expanded(
+                      child: Text(
+                        'Fach: ${session.subject}',
+                      ),
+                    ),
                   ],
                 ),
 
@@ -128,7 +144,11 @@ class LernzeitDetailScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.timer),
                     const SizedBox(width: 8),
-                    Text('Dauer: ${session.formattedDuration}'),
+                    Expanded(
+                      child: Text(
+                        'Dauer: ${session.formattedDuration}',
+                      ),
+                    ),
                   ],
                 ),
 
@@ -141,39 +161,77 @@ class LernzeitDetailScreen extends StatelessWidget {
 
                 const SizedBox(height: 32),
 
-                // Aktionen für den ausgewählten Eintrag
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () {
-                          openEditScreen(context);
-                        },
-                        icon: const Icon(Icons.edit),
-                        label: const Text('Bearbeiten'),
-                      ),
-                    ),
+                // Responsive Aktionen:
+                // Auf kleinen Displays untereinander,
+                // auf breiteren Displays nebeneinander.
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 360;
 
-                    const SizedBox(width: 12),
+                    if (isNarrow) {
+                      return Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                openEditScreen(context);
+                              },
+                              icon: const Icon(Icons.edit),
+                              label: const Text('Bearbeiten'),
+                            ),
+                          ),
 
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
+                          const SizedBox(height: 12),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () {
+                                confirmDelete(context);
+                              },
+                              icon: const Icon(Icons.delete),
+                              label: const Text('Löschen'),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              openEditScreen(context);
+                            },
+                            icon: const Icon(Icons.edit),
+                            label: const Text('Bearbeiten'),
+                          ),
                         ),
-                        onPressed: () {
-                          confirmDelete(context);
-                        },
-                        icon: const Icon(Icons.delete),
-                        label: const Text('Löschen'),
-                      ),
-                    ),
-                  ],
+
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              confirmDelete(context);
+                            },
+                            icon: const Icon(Icons.delete),
+                            label: const Text('Löschen'),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
