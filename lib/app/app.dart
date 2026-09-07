@@ -1,23 +1,62 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/lernzeit_tracker/presentation/auth_screen.dart';
+import '../features/lernzeit_tracker/presentation/welcome_screen.dart';
 import 'navigation_screen.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({super.key});
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  late Future<bool> onboardingFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    onboardingFuture = isOnboardingCompleted();
+  }
+
+  // Prüfen, ob der Welcome-Screen bereits abgeschlossen wurde
+  Future<bool> isOnboardingCompleted() async {
+    final preferences = await SharedPreferences.getInstance();
+
+    return preferences.getBool('onboarding_completed') ?? false;
+  }
+
+  // Welcome-Screen als abgeschlossen speichern
+  Future<void> completeOnboarding() async {
+    final preferences = await SharedPreferences.getInstance();
+
+    await preferences.setBool(
+      'onboarding_completed',
+      true,
+    );
+
+    if (mounted) {
+      setState(() {
+        onboardingFuture = Future.value(true);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Lernzeit Tracker',
       debugShowCheckedModeBanner: false,
-      home: StreamBuilder<User?>(
-        // Prüft laufend, ob ein Benutzer eingeloggt ist
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          // Während Firebase den Login-Status prüft
-          if (snapshot.connectionState == ConnectionState.waiting) {
+
+      // Zuerst prüfen, ob das Onboarding bereits angezeigt wurde
+      home: FutureBuilder<bool>(
+        future: onboardingFuture,
+        builder: (context, onboardingSnapshot) {
+          if (onboardingSnapshot.connectionState ==
+              ConnectionState.waiting) {
             return const Scaffold(
               body: Center(
                 child: CircularProgressIndicator(),
@@ -25,13 +64,35 @@ class App extends StatelessWidget {
             );
           }
 
-          // Eingeloggt: App anzeigen
-          if (snapshot.hasData) {
-            return const NavigationScreen();
+          // Beim ersten App-Start Welcome-Screen anzeigen
+          if (onboardingSnapshot.data != true) {
+            return WelcomeScreen(
+              onContinue: completeOnboarding,
+            );
           }
 
-          // Nicht eingeloggt: Login anzeigen
-          return const AuthScreen();
+          // Danach Login-Status prüfen
+          return StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, authSnapshot) {
+              if (authSnapshot.connectionState ==
+                  ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              // Eingeloggt: Haupt-App anzeigen
+              if (authSnapshot.hasData) {
+                return const NavigationScreen();
+              }
+
+              // Nicht eingeloggt: Login anzeigen
+              return const AuthScreen();
+            },
+          );
         },
       ),
     );
